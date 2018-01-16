@@ -1,14 +1,16 @@
 var rect = require("./rectangle");
 
 function solveRect(l,b) {
-    console.log("Rectangle with l = " + l + " and b = " + b)
-
-    if ( l <= 0 || b <= 0 ) {
-        console.log(" - ERR: Invalid dimenstions");
-    } else {
-        console.log(" - The are of the rect is " + rect.area(l,b));
-        console.log(" - The perimeter of rect is " + rect.perimeter(l,b));
-    }
+    console.log("Rectangle with l = " + l + " and b = " + b);
+    rect(l, b, (err, rectangle) => {
+        if (err) {
+            console.log(err.message);
+        } else {
+            console.log(" - Area of l:" + l + " and b: " + b + " is " + rectangle.area())
+            console.log(" - Perimeter of l:" + l + " and b: " + b + " is " + rectangle.perimeter())
+        }
+    });
+    console.log("After the call to rect");
 }
 
 solveRect(2,4);
