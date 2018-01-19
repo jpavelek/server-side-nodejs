@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const dishRouter = require("./routes/dishRouter");
 const promoRouter = require("./routes/promoRouter");
+const leaderRouter = require("./routes/leaderRouter");
 
 const hostname = "localhost";
 const port = 3000;
@@ -15,6 +16,7 @@ app.use(bodyParser.json());
 //Handle REST end-points with roouters
 app.use("/dishes", dishRouter);
 app.use("/promotions", promoRouter);
+app.use("/leaders", leaderRouter);
 
 //Serve static webpages from location relateive to current working dir
 app.use(express.static(__dirname + "/public"));
