@@ -14,7 +14,7 @@ app.use(express.static(__dirname + "/public"));
 
 app.use((req, resp, next) => {
     resp.status = 200;
-    resp.setHeader("Content-Tyle", "text/html");
+    resp.setHeader("Content-Type", "text/html");
     resp.end("<html><body><h1>Express server</h1></body></html>")
 })
 
