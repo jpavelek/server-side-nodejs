@@ -2,7 +2,7 @@ const MongoClient = require("mongodb").MongoClient;
 const assert = require("assert");
 
 const dboper = require("./operations");
-const url = "mongodb://localhost:27017/dishes";
+const url = "mongodb://localhost:27017/conFusion";
 
 MongoClient.connect(url, (err, db) => {
     assert.equal(err, null);
