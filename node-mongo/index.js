@@ -1,13 +1,13 @@
 const MongoClient = require("mongodb").MongoClient;
 const assert = require("assert");
 
-const url = "mongodb://localhost:27017";
+const url = "mongodb://localhost:27017/dishes";
 
-MongoClient.connect(url, (err, dbs) => {
+MongoClient.connect(url, (err, db) => {
     assert.equal(err, null);
 
     console.log("Connected to the server");
-    const db = dbs.db("conFusion");
+    //const db = dbs.db("conFusion");
 
     const collection = db.collection("dishes");
 
@@ -26,7 +26,7 @@ MongoClient.connect(url, (err, dbs) => {
             db.dropCollection("dishes", (err, result) => {
                 assert.equal(err, null);
 
-                dbs.close();
+                db.close();
             });
         });
     });
