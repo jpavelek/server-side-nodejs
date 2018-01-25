@@ -18,10 +18,28 @@ connect.then( function(db) {
     .then( function(dish) {
         console.log(dish);
 
-        return Dishes.find({}).exec();
+        return Dishes.findByIdAndUpdate(
+            dish._id, 
+            { 
+                $set: { description: "Updated buns and stuff"}
+            }, { 
+                new: true 
+            })
+            .exec();
     })
-    .then( function(dishes) {
-        console.log(dishes);
+    .then( function(dish) {
+        console.log(dish);
+
+        dish.comments.push({
+            rating: 5,
+            comment: "Yahoo...",
+            author: "Leo himsels"
+        });
+
+        return dish.save();
+    })
+    .then( function(dish) {
+        console.log(dish);
 
         return db.collection("dishes").drop();
     })
@@ -30,5 +48,5 @@ connect.then( function(db) {
     })
     .catch( function(err) {
         console.log(err);
-    })
-})
+    });
+});
