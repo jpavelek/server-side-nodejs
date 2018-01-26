@@ -19,6 +19,7 @@ const promotionSchema = new Schema({
     },
     price: {
         type: Currency,
+        min: 0,
         required: true
     },
     description: {
