@@ -4,6 +4,8 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var session = require("express-session");
+var FilesStore = require("session-file-store")(session);
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -34,12 +36,19 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser("12345-67890-AAAAA-BBBBB"));
+//app.use(cookieParser("12345-67890-AAAAA-BBBBB"));
+app.use(session({
+  name: "session-id",
+  secret: "12345-67890-AAAAA-BBBBB",
+  saveUninitialized: false,
+  resave: false,
+  store: new FilesStore()
+}));
 
 function auth(req, resp, next) {
-  console.log(req.signedCookies);
+  console.log(req.session);
 
-  if (!req.signedCookies.user) {
+  if (!req.session.user) {
 
     var authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -54,7 +63,7 @@ function auth(req, resp, next) {
     var password = auth[1];
 
     if (username === "admin" && password === "password") {
-      resp.cookie("user", "admin", {signed:true}); //"user" is our name for the cookie, checked above. Can be anything.
+      req.session.user = "admin"; // Same here, "user" and "admin" are out inventions, can be anything
       next();
     } else {
       var err = new Error("Wrong user or password");
@@ -62,13 +71,13 @@ function auth(req, resp, next) {
       err.status = 401;
       return next(err);
     }
-    // END of No signed cookie detected in request
+    // END of Session detected in request
   } else {
-    if (req.signedCookies.user === "admin") {
+    if (req.session.user === "admin") {
       next();
     } else {
-      // Found cookie, but wrong one.
-      var err = new Error("You are not authenticated. Wrong cookie.");
+      // Found session, but wrong one.
+      var err = new Error("You are not authenticated. Wrong session.");
       err.status = 401;
       return next(err);
     }
