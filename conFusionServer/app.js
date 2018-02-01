@@ -45,51 +45,31 @@ app.use(session({
   store: new FilesStore()
 }));
 
+app.use('/', index);
+app.use('/users', users);
+
 function auth(req, resp, next) {
   console.log(req.session);
 
   if (!req.session.user) {
-
-    var authHeader = req.headers.authorization;
-    if (!authHeader) {
-      var err = new Error("You are not authenticated");
-      resp.setHeader("WWW-Authenticate", "Basic");
-      err.status = 401;
-      return next(err);
-    } 
-
-    var auth = new Buffer(authHeader.split(" ")[1], "base64").toString().split(":");
-    var username = auth[0];
-    var password = auth[1];
-
-    if (username === "admin" && password === "password") {
-      req.session.user = "admin"; // Same here, "user" and "admin" are out inventions, can be anything
-      next();
-    } else {
-      var err = new Error("Wrong user or password");
-      resp.setHeader("WWW-Authenticate", "Basic");
-      err.status = 401;
-      return next(err);
-    }
-    // END of Session detected in request
+    var err = new Error("You are not authenticated");
+    err.status = 403;
+    return next(err);
   } else {
-    if (req.session.user === "admin") {
+    if (req.session.user === "authenticated") {
       next();
     } else {
-      // Found session, but wrong one.
       var err = new Error("You are not authenticated. Wrong session.");
-      err.status = 401;
+      err.status = 403;
       return next(err);
     }
-  } // END of found the cookie,good or bad.
+  }
 }
 
 app.use(auth);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
-app.use('/users', users);
 app.use('/dishes', dishRouter);
 app.use('/promotions', promotRouter);
 app.use('/leaders', leaderRouter);
