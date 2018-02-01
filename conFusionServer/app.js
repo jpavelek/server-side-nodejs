@@ -34,36 +34,45 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser("12345-67890-AAAAA-BBBBB"));
 
 function auth(req, resp, next) {
-  console.log(req.headers);
+  console.log(req.signedCookies);
 
-  var authHeader = req.headers.authorization;
-  if (!authHeader) {
-    var err = new Error("You are not authenticated");
-    resp.setHeader("WWW-Authenticate", "Basic");
-    err.status = 401;
-    return next(err);
-  } 
+  if (!req.signedCookies.user) {
 
+    var authHeader = req.headers.authorization;
+    if (!authHeader) {
+      var err = new Error("You are not authenticated");
+      resp.setHeader("WWW-Authenticate", "Basic");
+      err.status = 401;
+      return next(err);
+    } 
 
-  var auth = new Buffer(authHeader.split(" ")[1], "base64").toString().split(":");
-  console.log(auth);
-  var username = auth[0];
-  var password = auth[1];
-  console.log(username)
-  console.log(password)
+    var auth = new Buffer(authHeader.split(" ")[1], "base64").toString().split(":");
+    var username = auth[0];
+    var password = auth[1];
 
-  if (username === "admin" && password === "password") {
-    next();
+    if (username === "admin" && password === "password") {
+      resp.cookie("user", "admin", {signed:true}); //"user" is our name for the cookie, checked above. Can be anything.
+      next();
+    } else {
+      var err = new Error("Wrong user or password");
+      resp.setHeader("WWW-Authenticate", "Basic");
+      err.status = 401;
+      return next(err);
+    }
+    // END of No signed cookie detected in request
   } else {
-    var err = new Error("Wrong user or password");
-    resp.setHeader("WWW-Authenticate", "Basic");
-    err.status = 401;
-    return next(err);
-  }
-
+    if (req.signedCookies.user === "admin") {
+      next();
+    } else {
+      // Found cookie, but wrong one.
+      var err = new Error("You are not authenticated. Wrong cookie.");
+      err.status = 401;
+      return next(err);
+    }
+  } // END of found the cookie,good or bad.
 }
 
 app.use(auth);
