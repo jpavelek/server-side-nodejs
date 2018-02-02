@@ -8,6 +8,8 @@ var session = require("express-session");
 var FilesStore = require("session-file-store")(session);
 var passport = require("passport");
 var autheticate = require("./authenticate");
+var config = require("./config");
+
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -18,7 +20,7 @@ var leaderRouter = require('./routes/leaderRouter');
 const mongoose = require('mongoose');
 mongoose.Promise = require("bluebird");
 
-const url = "mongodb://localhost:27017/conFusion";
+const url = config.mongoUrl;
 const connect = mongoose.connect(url, { userMongoClient: true});
 
 connect.then(function(db) {
@@ -38,32 +40,11 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(session({
-  name: "session-id",
-  secret: "12345-67890-AAAAA-BBBBB",
-  saveUninitialized: false,
-  resave: false,
-  store: new FilesStore()
-}));
 
 app.use(passport.initialize());
-app.use(passport.session());
 
 app.use('/', index);
 app.use('/users', users);
-
-function auth(req, resp, next) {
-
-  if (!req.user) {
-    var err = new Error("You are not authenticated");
-    err.status = 403;
-    return next(err);
-  } else {
-    next();
-  }
-}
-
-app.use(auth);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
