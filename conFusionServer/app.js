@@ -6,6 +6,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require("express-session");
 var FilesStore = require("session-file-store")(session);
+var passport = require("passport");
+var autheticate = require("./authenticate");
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -36,7 +38,6 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-//app.use(cookieParser("12345-67890-AAAAA-BBBBB"));
 app.use(session({
   name: "session-id",
   secret: "12345-67890-AAAAA-BBBBB",
@@ -45,24 +46,20 @@ app.use(session({
   store: new FilesStore()
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/', index);
 app.use('/users', users);
 
 function auth(req, resp, next) {
-  console.log(req.session);
 
-  if (!req.session.user) {
+  if (!req.user) {
     var err = new Error("You are not authenticated");
     err.status = 403;
     return next(err);
   } else {
-    if (req.session.user === "authenticated") {
-      next();
-    } else {
-      var err = new Error("You are not authenticated. Wrong session.");
-      err.status = 403;
-      return next(err);
-    }
+    next();
   }
 }
 
