@@ -7,6 +7,24 @@ var authenticate = require("../authenticate");
 var router = express.Router();
 router.use(bodyParser.json());
 
+//Router for general /users
+router.route("/")
+.get(authenticate.verifyUser, authenticate.verifyAdmin, (req, resp, next) => {
+    User.find({})
+    .then(function(users) {
+        resp.statusCode = 200;
+        resp.setHeader("Content-Type", "application/json");
+        resp.json(users);
+    }, function(err) {
+        next(err);
+    })
+    .catch(function(err) {
+        next(err);
+    })
+})
+
+
+
 router.post("/signup", function(req, resp, next) {
   User.register(new User({username:req.body.username}), req.body.password, function(err, user) {
     if (err) {
