@@ -24,7 +24,7 @@ dishRouter.route("/")
         next(err);
     })
 })
-.post(authenticate.verifyUser, (req, resp, next) => {
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, resp, next) => {
     Dishes.create(req.body)
     .then(function(dish) {
         console.log("Dish created ", dish);
@@ -38,11 +38,11 @@ dishRouter.route("/")
         next(err);
     })
 })
-.put(authenticate.verifyUser, (req, resp, next) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, resp, next) => {
     resp.statusCode = 403;
     resp.end("PUT operation not supported");
 })
-.delete(authenticate.verifyUser, (req, resp, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, resp, next) => {
     Dishes.remove({})
     .then( function(res) {
         resp.statusCode = 200;
@@ -73,11 +73,11 @@ dishRouter.route("/:dishId")
         next(err);
     })
 })
-.post(authenticate.verifyUser, (req, resp, next) => {
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, resp, next) => {
     resp.statusCode = 403;
     resp.end("POST operation not supported on /dishes/" + req.params.dishId);
 })
-.put(authenticate.verifyUser, (req, resp, next) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, resp, next) => {
     Dishes.findByIdAndUpdate(req.params.dishId, {
         $set: req.body
     }, { new: true })
@@ -92,7 +92,7 @@ dishRouter.route("/:dishId")
         next(err);
     })
 })
-.delete(authenticate.verifyUser, (req, resp, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, resp, next) => {
     Dishes.findByIdAndRemove(req.params.dishId)
     .then( function(res) {
         resp.statusCode = 200;
@@ -158,7 +158,7 @@ dishRouter.route("/:dishId/comments")
     resp.statusCode = 403;
     resp.end("PUT operation not supported on /dishes/" + req.params.dishId);
 })
-.delete(authenticate.verifyUser, (req, resp, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, resp, next) => {
     Dishes.findById(req.params.dishId)
     .then( function(dish) {
         if (dish != null ) {
