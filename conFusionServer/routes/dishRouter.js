@@ -221,6 +221,12 @@ dishRouter.route("/:dishId/comments/:commentId")
     Dishes.findById(req.params.dishId)
     .then(function(dish) {
         if (dish != null && dish.comments.id(req.params.commentId) != null) {
+            if (!req.user._id.equals(dish.comments.id(req.params.commentId).author)) {
+                var err = new Error("Cannot edit comments from another user");
+                err.status = 403;
+                next(err); //Wrong user modifying comment, exit through next with error handling
+            }
+            //User verified, go on
             if (req.body.rating) {
                 dish.comments.id(req.params.commentId).rating = req.body.rating;
             }
@@ -255,6 +261,12 @@ dishRouter.route("/:dishId/comments/:commentId")
     Dishes.findById(req.params.dishId)
     .then( function(dish) {
         if (dish != null && dish.comments.id(req.params.commentId) != null) {
+            if (!req.user._id.equals(dish.comments.id(req.params.commentId).author)) {
+                var err = new Error("Cannot delete comments from another user");
+                err.status = 403;
+                next(err); //Wrong user deleting comment, exit through next with error handling
+            }
+            //User verified, go on
             dish.comments.id(req.params.commentId).remove();
             dish.save()
             .then(function(dish) {
