@@ -31,6 +31,14 @@ connect.then(function(db) {
 
 var app = express();
 
+app.all("*", function(req, resp, next) {
+  if (req.secure) {
+    next();
+  } else {
+    resp.redirect(307, "https://" + req.hostname + ":" + app.get("secPort") + req.url);
+  }
+});
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
