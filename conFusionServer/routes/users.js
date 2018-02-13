@@ -9,6 +9,9 @@ var router = express.Router();
 router.use(bodyParser.json());
 
 //Router for general /users
+router.options("*", cors.corsWithOptions, function(req, resp) {
+  return resp.sendStatus(200);
+})
 router.get("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, resp, next) => {
   User.find({})
   .then(function(users) {
@@ -55,11 +58,32 @@ router.post("/signup", cors.corsWithOptions, function(req, resp, next) {
   });
 });
 
-router.post("/login", cors.corsWithOptions, passport.authenticate("local"), function(req, resp, next) {
-  var token = authenticate.getToken({_id: req.user._id});
-  resp.statusCode = 200;
-  resp.setHeader("Content-Type", "application/json");
-  resp.json({success: true, token: token, status: "You are logged in"});
+router.post("/login", cors.corsWithOptions, function(req, resp, next) {
+  passport.authenticate("local", function(err, user, info) {
+    if (err) {
+      //Authentication process error
+      return next(err);
+    }
+    if (!user) {
+      //User not found or password incorrect
+      resp.statusCode = 401;
+      resp.setHeader("Content-Type", "application/json");
+      resp.json({success: false, status: "Login failed.", err:info });
+    }
+    req.logIn(user, function(err) {
+      if (err) {
+        //User not found or password incorrect
+        resp.statusCode = 401;
+        resp.setHeader("Content-Type", "application/json");
+        resp.json({success: false, status: "Login failed.", err: "Could not log-in user" });
+      } 
+      //No errors this far, all good, return token
+      var token = authenticate.getToken({_id: req.user._id});
+      resp.statusCode = 200;
+      resp.setHeader("Content-Type", "application/json");
+      resp.json( {success: true, status: "You are logged in", token: token});
+    });
+  })(req,resp, next);
 });
 
 router.get("/logout", function(req, res) {
@@ -72,6 +96,23 @@ router.get("/logout", function(req, res) {
     err.status = 403;
     next(err);
   }
+});
+
+router.get("/checkJWTToken", cors.corsWithOptions, function(req,resp){
+  passport.authenticate("jwt", {session: false}, function(err, user, info) {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      resp.statusCode = 401;
+      resp.setHeader("Content-Type", "applicatiojn/json");
+      return resp.json({status: "JWT invalid!", success: false, err:info});
+    } else {
+      resp.statusCode = 200;
+      resp.setHeader("Content-Type", "applicatiojn/json");
+      return resp.json({status: "JWT valid!", success: true, user:info});
+    }
+  })(req, resp);
 });
 
 module.exports = router;

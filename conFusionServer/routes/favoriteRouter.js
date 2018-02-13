@@ -77,20 +77,23 @@ favoriteRouter.route("/:favId")
     Favorites.findOne( { user: req.user._id} )
     .populate("dishes")
     .then(function(fav) {
-        var found = false;
-        fav.dishes.find(function(element) {
-            if (element._id.equals(req.params.favId)) {
-                console.log("Found the record, returning", element);
-                found = true;
+        if (!fav) {
+            //No favorites for this user
+            resp.statusCode = 200;
+            resp.setHeader("Content-Type", "application/json");
+            return resp.json( { "exists": false, "favorites": fav} );
+        } else {
+            if (fav.dishes.indexOf(req.params.favId) < 0) {
+                //Did not find such favortie dish
                 resp.statusCode = 200;
                 resp.setHeader("Content-Type", "application/json");
-                resp.json(element);
+                return resp.json( { "exists": false, "favorites": fav} );
+            } else {
+                // Correct user and existing dish favorite
+                resp.statusCode = 200;
+                resp.setHeader("Content-Type", "application/json");
+                return resp.json( { "exists": true, "favorites": fav} );
             }
-        });
-        if (found === false) {
-            console.log("Did not find such record");
-            resp.statusCode = 404;
-            resp.end("Did not find any such favorite");
         }
     }, function(err) {
         next(err);
@@ -138,10 +141,16 @@ favoriteRouter.route("/:favId")
     var options = { "new": true, "upsert": true };
     var update = { "$pull": { "dishes": req.params.favId }}; //Remove all instances of this favorite dish
     Favorites.findOneAndUpdate(query, update, options)
-    .then(function(res) {
-        resp.statusCode = 200;
-        resp.setHeader("Content-Type", "application/json");
-        resp.json(res);
+    .then(function(fav) {
+        Favorites.findById(fav._id)
+        .populate("user")
+        .populate("dishes")
+        .then(function(updatedfav) {
+            resp.statusCode = 200;
+            resp.setHeader("Content-Type", "application/json");
+            resp.json(updatedfav);
+        })
+        
     }, function(err) {
         next(err);
     })
