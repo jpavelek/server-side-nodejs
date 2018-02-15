@@ -75,7 +75,6 @@ favoriteRouter.route("/:favId")
 .options(cors.corsWithOptions, (req,resp) => { resp.sendStatus(200);})
 .get(cors.cors, authenticate.verifyUser, (req, resp, next) => {
     Favorites.findOne( { user: req.user._id} )
-    .populate("dishes")
     .then(function(fav) {
         if (!fav) {
             //No favorites for this user

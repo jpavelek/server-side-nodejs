@@ -10,7 +10,7 @@ const favoriteSchema = new Schema({
     dishes: [ { type: mongoose.Schema.Types.ObjectId, ref: "Dish" } ]
 },
 {
-    timestamps: false 
+    timestamps: true 
 });
 
 var Favorites = mongoose.model("Favorite", favoriteSchema);
