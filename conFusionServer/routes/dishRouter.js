@@ -64,7 +64,7 @@ dishRouter.route("/:dishId")
 .options(cors.corsWithOptions, (req,resp) => { resp.sendStatus(200);})
 .get(cors.cors, (req, resp, next) => {
     Dishes.findById(req.params.dishId)
-    .populate("commments.author")
+    .populate({path: "comments.author", model: "User"}) // This does not work :-/  .populate("commments.author")
     .then(function(dish) {
         resp.statusCode = 200;
         resp.setHeader("Content-Type", "application/json");
@@ -116,6 +116,7 @@ dishRouter.route("/:dishId/comments")
     Dishes.findById(req.params.dishId)
     .populate("comments.author")
     .then(function(dish) {
+        console.log("GET on dish comments", dish);
         if (dish != null) {
             resp.statusCode = 200;
             resp.setHeader("Content-Type", "application/json");
