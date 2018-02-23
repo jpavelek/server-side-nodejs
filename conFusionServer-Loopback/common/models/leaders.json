@@ -25,6 +25,11 @@
     "description": {
       "type": "string",
       "required": true
+    },
+    "featured": {
+      "type": "boolean",
+      "required": true,
+      "default": false
     }
   },
   "validations": [],
