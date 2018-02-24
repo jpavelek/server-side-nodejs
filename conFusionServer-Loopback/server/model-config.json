@@ -50,5 +50,13 @@
   "Customer": {
     "dataSource": "MongoDB",
     "public": true
+  },
+  "Comment": {
+    "dataSource": "MongoDB",
+    "public": true
+  },
+  "Favorite": {
+    "dataSource": "MongoDB",
+    "public": true
   }
 }
