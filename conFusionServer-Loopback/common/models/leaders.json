@@ -32,6 +32,9 @@
       "default": false
     }
   },
+  "mixins": {
+    "TimeStamp": true
+  },
   "validations": [],
   "relations": {},
   "acls": [

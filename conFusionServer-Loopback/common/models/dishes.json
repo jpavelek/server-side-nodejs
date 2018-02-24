@@ -38,6 +38,9 @@
       "default": false
     }
   },
+  "mixins": {
+    "TimeStamp": true
+  },
   "validations": [],
   "relations": {
     "comments": {
